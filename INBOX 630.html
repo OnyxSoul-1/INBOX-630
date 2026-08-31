@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>INBOX 630 · OnyxSoul</title>
+
+    <!-- Google Font (dynamic) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link id="dynamic-font-link" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" />
+
+    <style>
+        /* ===== ROOT ===== */
+        :root {
+            --main-font: 'Outfit';
+            --font-scale: 1;
+            --btn-bg: rgba(12, 18, 28, 0.55);
+            --btn-border: rgba(255, 255, 255, 0.2);
+            --btn-text: #ffffff;
+            --accent-glow: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: var(--main-font), -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #05050d;
+            color: #fff;
+        }
+
+        /* ===== WALLPAPER ===== */
+        #wallpaper-container {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 30%, #151b26 0%, #05050d 100%);
+        }
+        #wallpaper-image,
+        #wallpaper-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            display: none;
+            z-index: 0;
+        }
+
+        /* ===== FOCUS ===== */
+        .focusable {
+            outline: none;
+            transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), background 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease !important;
+        }
+        .focusable.focused {
+            background: #ffffff !important;
+            color: #000000 !important;
+            outline: 3px solid #ffffff !important;
+            box-shadow: 0 0 30px var(--accent-glow), 0 0 15px rgba(255, 255, 255, 0.7) !important;
+            transform: scale(1.03) translateY(-2px) !important;
+            z-index: 20;
+        }
+        .focusable.focused * {
+            color: #000000 !important;
+            fill: #000000 !important;
+            stroke: #000000 !important;
+        }
+
+        /* ===== SCREENSAVER ===== */
+        #screensaver {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(1.05);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        #screensaver.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .screensaver-clock {
+            font-size: calc(85px * var(--font-scale));
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.5);
+            line-height: 1;
+            text-align: center;
+        }
+        .screensaver-date {
+            font-size: calc(22px * var(--font-scale));
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+            margin-top: 20px;
+        }
+        body.screensaver-on #dashboard-screen,
+        body.screensaver-on #start-screen,
+        body.screensaver-on #login-modal,
+        body.screensaver-on .app-modal {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* ===== BOOT ===== */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #111d29 0%, #000000 90%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .boot-ring-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .boot-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 5px solid transparent;
+            border-top-color: #fff;
+            border-right-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 40px #fff;
+            animation: spin360 2s ease-in-out forwards;
+        }
+        .boot-sphere {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fff 0%, #7d96a6 50%, #050d1a 100%);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+            transform: scale(0);
+            animation: popSphere 1.2s 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .boot-text {
+            margin-top: 30px;
+            font-size: calc(36px * var(--font-scale));
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: #fff;
+            opacity: 0;
+            animation: fadeIn 1s 1.5s forwards;
+        }
+        @keyframes spin360 {
+            0% {
+                transform: rotate(0deg) scale(0.4);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(720deg) scale(1);
+                opacity: 1;
+            }
+        }
+        @keyframes popSphere {
+            to {
+                transform: scale(1);
+            }
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ===== START SCREEN ===== */
+        #start-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 1000;
+            color: #fff;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .nxe-header-text {
+            padding: 50px 0 0 70px;
+        }
+        .nxe-header-text h3 {
+            font-size: calc(24px * var(--font-scale));
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .nxe-header-text h2 {
+            font-size: calc(28px * var(--font-scale));
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .nxe-header-text h1 {
+            font-size: calc(36px * var(--font-scale));
+            font-weight: 900;
+            color: #fff;
+        }
+        .nxe-tiles-wrapper {
+            display: flex;
+            gap: 25px;
+            padding-left: 70px;
+            align-items: center;
+            margin-top: -40px;
+        }
+        .nxe-card {
+            background: var(--btn-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--btn-border);
+            border-radius: 8px;
+            color: var(--btn-text);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .nxe-tray {
+            width: 300px;
+            height: 230px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .nxe-signin {
+            width: 280px;
+            height: 210px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .nxe-library {
+            width: 250px;
+            height: 180px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .disc-graphic {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, #768a96 0%, #1a252c 70%);
+            margin: auto;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* ===== LOGIN ===== */
+        #login-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+        #login-modal.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-box {
+            background: rgba(15, 20, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--btn-border);
+            width: 400px;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .modal-box h2 {
+            margin-bottom: 20px;
+            font-size: calc(22px * var(--font-scale));
+            font-weight: 700;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--btn-border);
+            border-radius: 5px;
+            color: #fff;
+            font-size: 14px;
+            user-select: text;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            border-radius: 5px;
+            color: var(--btn-text);
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .error-msg {
+            color: #ff5555;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ===== DASHBOARD ===== */
+        #dashboard-screen {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: space-between;
+            padding: 40px 60px 0 60px;
+            transition: opacity 0.8s ease;
+        }
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .nav-item {
+            font-size: calc(18px * var(--font-scale));
+            font-weight: 600;
+            color: var(--btn-text);
+            text-transform: lowercase;
+            cursor: pointer;
+            padding: 8px 18px;
+            border-radius: 6px;
+            background: var(--btn-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--btn-border);
+        }
+        .nav-item.active {
+            background-color: #ffffff;
+            color: #000000;
+            font-weight: 800;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .user-profile-badge {
+            margin-left: auto;
+            font-size: calc(14px * var(--font-scale));
+            color: #fff;
+            font-weight: 700;
+            background: var(--btn-bg);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--btn-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .content-area {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            margin-top: 25px;
+            margin-bottom: 20px;
+        }
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 340px;
+            flex-shrink: 0;
+        }
+        .glass-tile {
+            background: var(--btn-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--btn-border);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            min-height: 72px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--btn-text);
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .glass-tile .tile-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            width: 32px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass-tile .tile-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .glass-tile .tile-text {
+            font-size: calc(15px * var(--font-scale));
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .glass-tile .tile-subtext {
+            font-size: calc(11px * var(--font-scale));
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+
+        .main-feature-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: var(--btn-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--btn-border);
+            border-radius: 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 30px 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+            transition: background 0.8s ease;
+        }
+        .hero-carousel-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 0;
+        }
+        .hero-carousel-bg.active {
+            opacity: 0.35;
+        }
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(5, 5, 13, 0.9) 0%, rgba(5, 5, 13, 0.4) 60%, rgba(5, 5, 13, 0.8) 100%);
+            z-index: 1;
+        }
+        .hero-header-line {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        .hero-logo-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fff 0%, #7d96a6 50%, #050d1a 100%);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+        }
+        .hero-details h1 {
+            font-size: calc(32px * var(--font-scale));
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.8);
+        }
+        .hero-details p {
+            font-size: calc(13px * var(--font-scale));
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 6px;
+            line-height: 1.4;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+            max-width: 600px;
+        }
+        .carousel-indicators {
+            position: absolute;
+            bottom: 15px;
+            right: 25px;
+            display: flex;
+            gap: 8px;
+            z-index: 3;
+        }
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .carousel-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+            box-shadow: 0 0 8px #fff;
+        }
+
+        .secondary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            height: auto;
+        }
+        .sub-tile {
+            background: var(--btn-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--btn-border);
+            color: var(--btn-text);
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            gap: 14px;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .sub-tile .sub-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bottom-bar {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        .prompt-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 600;
+            color: #fff;
+        }
+        .btn-badge {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+            color: #000;
+            background-color: #fff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        /* ===== APP MODALS ===== */
+        .app-modal {
+            position: fixed;
+            inset: 40px;
+            z-index: 6000;
+            background: rgba(10, 14, 23, 0.95);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--btn-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .app-modal.active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .app-modal-header {
+            height: 55px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--btn-border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+        .app-modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .app-modal-close {
+            margin-left: auto;
+            background: #ff4444;
+            color: #fff;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* ===== EMBED IFRAME ===== */
+        .embed-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        /* ===== GAMES GRID (14 clickable buttons) ===== */
+        .games-grid-container {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            align-content: start;
+        }
+
+        /* Each game as a big clickable button */
+        .game-btn {
+            background: var(--btn-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--btn-border);
+            border-radius: 10px;
+            padding: 20px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 110px;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .game-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.15), 0 0 20px var(--accent-glow);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .game-btn .game-icon {
+            font-size: 32px;
+            margin-bottom: 4px;
+        }
+        .game-btn .game-title {
+            font-size: 14px;
+            line-height: 1.3;
+        }
+        .game-btn .game-sub {
+            font-size: 11px;
+            opacity: 0.6;
+            font-weight: 400;
+        }
+
+        /* ===== ARCADE GRID (4 buttons) ===== */
+        .arcade-grid {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            align-content: start;
+        }
+        .arcade-btn {
+            background: var(--btn-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--btn-border);
+            border-radius: 10px;
+            padding: 20px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 110px;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .arcade-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .arcade-btn .game-icon {
+            font-size: 32px;
+            margin-bottom: 4px;
+        }
+
+        /* ===== "STILL WORKING" PLACEHOLDER ===== */
+        .placeholder-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #fff;
+            text-align: center;
+            gap: 16px;
+        }
+        .placeholder-panel .big-icon {
+            font-size: 72px;
+            opacity: 0.3;
+        }
+        .placeholder-panel h2 {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .placeholder-panel p {
+            font-size: 16px;
+            opacity: 0.7;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        /* ===== XBOX 360 PROFILE VIEW ===== */
+        .profile-container {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            background: radial-gradient(circle at 20% 30%, #1a2633, #0b0f17);
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+        }
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #7d96a6, #1a252c);
+            border: 4px solid #fff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 900;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .profile-info h1 {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .profile-info .gamertag {
+            font-size: 18px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        .profile-info .motto {
+            font-size: 14px;
+            opacity: 0.5;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-item .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffd700;
+        }
+        .stat-item .stat-label {
+            font-size: 12px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .profile-achievements {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .profile-achievements h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+        .achieve-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .achieve-badge-sm {
+            background: #ffd700;
+            color: #000;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .achieve-badge-sm.locked {
+            background: rgba(255, 255, 255, 0.1);
+            color: #666;
+        }
+        .profile-recent {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .profile-recent h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+        .recent-game {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .recent-game:last-child {
+            border-bottom: none;
+        }
+        .recent-game .game-icon-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background: #1a252c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .recent-game .game-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .recent-game .game-time {
+            font-size: 12px;
+            opacity: 0.4;
+            margin-left: auto;
+        }
+
+        /* ===== BROWSER / IFRAME ===== */
+        .browser-nav {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+        }
+        .browser-input {
+            flex: 1;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--btn-border);
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            font-size: 14px;
+            user-select: text;
+        }
+        .browser-go-btn {
+            padding: 8px 18px;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--btn-text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .browser-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        /* ===== FILE MANAGER ===== */
+        .fm-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .fm-sidebar {
+            width: 250px;
+            border-right: 1px solid var(--btn-border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .fm-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .fm-file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .fm-preview-pane {
+            flex: 1;
+            border: 1px dashed var(--btn-border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .fm-preview-pane iframe,
+        .fm-preview-pane img,
+        .fm-preview-pane video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border: none;
+        }
+
+        /* ===== MEDIA PLAYER ===== */
+        .media-player-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 15px;
+        }
+        .audio-player-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--btn-border);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .video-player-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--btn-border);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* ===== POPUP ===== */
+        .popup-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 20, 30, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--btn-border);
+            padding: 30px;
+            border-radius: 12px;
+            z-index: 7000;
+            display: none;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+        .popup-dialog.active {
+            display: block;
+        }
+        .popup-dialog h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        .popup-dialog p {
+            font-size: 14px;
+            opacity: 0.85;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+        .popup-dialog button {
+            padding: 10px 24px;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--btn-text);
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        svg.icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        .games-grid-container::-webkit-scrollbar,
+        .arcade-grid::-webkit-scrollbar,
+        .fm-content::-webkit-scrollbar,
+        .fm-sidebar::-webkit-scrollbar,
+        .profile-container::-webkit-scrollbar {
+            width: 5px;
+        }
+        .games-grid-container::-webkit-scrollbar-track,
+        .arcade-grid::-webkit-scrollbar-track,
+        .fm-content::-webkit-scrollbar-track,
+        .fm-sidebar::-webkit-scrollbar-track,
+        .profile-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .games-grid-container::-webkit-scrollbar-thumb,
+        .arcade-grid::-webkit-scrollbar-thumb,
+        .fm-content::-webkit-scrollbar-thumb,
+        .fm-sidebar::-webkit-scrollbar-thumb,
+        .profile-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HIDDEN INPUTS ===== -->
+    <input type="file" id="imageFileInput" accept="image/*" style="display:none;" />
+    <input type="file" id="gifFileInput" accept="image/gif" style="display:none;" />
+    <input type="file" id="videoFileInput" accept="video/*" style="display:none;" />
+    <input type="color" id="buttonColorPicker" style="display:none;" />
+    <input type="file" id="systemFileManagerInput" multiple style="display:none;" />
+    <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" />
+    <input type="file" id="playerVideoFileInput" accept="video/*" style="display:none;" />
+
+    <audio id="globalBgAudio" style="display:none;"></audio>
+
+    <!-- ===== WALLPAPER ===== -->
+    <div id="wallpaper-container">
+        <img id="wallpaper-image" alt="Wallpaper" />
+        <video id="wallpaper-video" loop playsinline></video>
+    </div>
+
+    <!-- ===== SCREENSAVER ===== -->
+    <div id="screensaver">
+        <div class="screensaver-clock" id="screensaverClock">--:--:--</div>
+        <div class="screensaver-date" id="screensaverDate">Loading...</div>
+    </div>
+
+    <!-- ===== BOOT ===== -->
+    <div id="boot-screen">
+        <div class="boot-ring-container">
+            <div class="boot-ring"></div>
+            <div class="boot-sphere"></div>
+        </div>
+        <div class="boot-text">INBOX 630</div>
+    </div>
+
+    <!-- ===== START SCREEN ===== -->
+    <div id="start-screen">
+        <div class="nxe-header-text">
+            <h3>Welcome</h3>
+            <h2>INBOX LIVE</h2>
+            <h1>My INBOX</h1>
+        </div>
+        <div class="nxe-tiles-wrapper">
+            <div class="nxe-card nxe-tray focusable">
+                <div class="disc-graphic"></div>
+                <div style="font-size:18px; font-weight:bold;">Open Tray</div>
+            </div>
+            <div class="nxe-card nxe-signin focusable" id="nxeSignInBtn">
+                <div style="font-size:18px; font-weight:bold;">Sign In</div>
+                <div style="font-size:12px; opacity:0.8; margin-top:4px;">No Profiles Found</div>
+            </div>
+            <div class="nxe-card nxe-library focusable" onclick="openAppModal('gamesLibraryModal')">
+                <div style="font-size:18px; font-weight:bold;">Game Library</div>
+            </div>
+        </div>
+        <div class="bottom-bar" style="padding:0 70px;">
+            <div class="prompt-item">
+                <span class="btn-badge">A</span>
+                <span>Select</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOGIN ===== -->
+    <div id="login-modal">
+        <div class="modal-box">
+            <h2>INBOX 630 Sign In</h2>
+            <input type="text" id="username" class="input-field focusable" placeholder="Gamertag" value="Player 1" />
+            <input type="password" id="password" class="input-field focusable" placeholder="Password (homework123)" />
+            <button class="submit-btn focusable" id="loginBtn">Sign In</button>
+            <div class="error-msg" id="errorMsg">Incorrect password! Try homework123</div>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard-screen">
+        <div class="header-nav" id="topNav">
+            <div class="nav-item focusable active" data-category="home">home</div>
+            <div class="nav-item focusable" data-category="social">social</div>
+            <div class="nav-item focusable" data-category="games">games</div>
+            <div class="nav-item focusable" data-category="tvmovies">tv & movies</div>
+            <div class="nav-item focusable" data-category="music">music</div>
+            <div class="nav-item focusable" data-category="apps">apps</div>
+            <div class="nav-item focusable" data-category="settings">settings</div>
+            <div class="user-profile-badge" id="profileBadge">
+                <span id="userProfileIcon"></span>
+                <span id="userProfileText">Player 1</span>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="left-column" id="leftColumn"></div>
+            <div class="main-feature-panel">
+                <div class="hero-banner" id="heroBanner">
+                    <div class="hero-carousel-bg" id="heroBg0"></div>
+                    <div class="hero-carousel-bg" id="heroBg1"></div>
+                    <div class="hero-overlay" id="heroOverlay"></div>
+                    <div class="hero-header-line">
+                        <div class="hero-logo-container"></div>
+                        <div class="hero-details" id="heroDetails">
+                            <h1>INBOX LIVE</h1>
+                            <p>Welcome back! System operational & connected.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-indicators" id="carouselIndicators" style="display:none;"></div>
+                </div>
+                <div class="secondary-row" id="secondaryRow"></div>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="prompt-item">
+                <span class="btn-badge">A</span>
+                <span>Select Option</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  SOCIAL MODALS (Friends, Messages, Party Chat / Airtalk)     -->
+    <!-- ============================================================ -->
+
+    <!-- Friends List → Padlet Embed -->
+    <div class="app-modal" id="friendsListModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">👥 Friends List</div>
+            <button class="app-modal-close" onclick="closeAppModal('friendsListModal')">✕ Close</button>
+        </div>
+        <iframe class="embed-frame" src="https://padlet.com/OnyxSoul/inbox-630-live-hyhx4y2z4v5e8q1e"></iframe>
+    </div>
+
+    <!-- Messages → Proton Mail Embed -->
+    <div class="app-modal" id="messagesModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">✉️ Messages</div>
+            <button class="app-modal-close" onclick="closeAppModal('messagesModal')">✕ Close</button>
+        </div>
+        <iframe class="embed-frame" src="https://mail.proton.me/"></iframe>
+    </div>
+
+    <!-- Party Chat → Airtalk Embed -->
+    <div class="app-modal" id="partyChatModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">🎤 Airtalk</div>
+            <button class="app-modal-close" onclick="closeAppModal('partyChatModal')">✕ Close</button>
+        </div>
+        <iframe class="embed-frame" src="https://www.airtalk.live/"></iframe>
+    </div>
+
+    <!-- View Profile → Xbox 360 style -->
+    <div class="app-modal" id="viewProfileModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">👤 View Profile</div>
+            <button class="app-modal-close" onclick="closeAppModal('viewProfileModal')">✕ Close</button>
+        </div>
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar">P1</div>
+                <div class="profile-info">
+                    <h1 id="profileGamertag">Player 1</h1>
+                    <div class="gamertag">Gamertag: Player 1</div>
+                    <div class="motto">"Stay golden, stay gaming."</div>
+                </div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-value">1,250</div>
+                    <div class="stat-label">Gamerscore</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">14</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Friends Online</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">🏆</div>
+                    <div class="stat-label">Rank #1</div>
+                </div>
+            </div>
+            <div class="profile-achievements">
+                <h3>🏅 Achievements</h3>
+                <div class="achieve-row">
+                    <span class="achieve-badge-sm">⭐ Retro Conqueror</span>
+                    <span class="achieve-badge-sm">⭐ Arcade Master</span>
+                    <span class="achieve-badge-sm locked">🔒 Legendary</span>
+                    <span class="achieve-badge-sm locked">🔒 Speed Demon</span>
+                </div>
+            </div>
+            <div class="profile-recent">
+                <h3>🎮 Recently Played</h3>
+                <div class="recent-game">
+                    <div class="game-icon-sm">🕹️</div>
+                    <span class="game-name">Doom Classic</span>
+                    <span class="game-time">2h ago</span>
+                </div>
+                <div class="recent-game">
+                    <div class="game-icon-sm">🟡</div>
+                    <span class="game-name">Pac-Man Retro</span>
+                    <span class="game-time">5h ago</span>
+                </div>
+                <div class="recent-game">
+                    <div class="game-icon-sm">🧩</div>
+                    <span class="game-name">Tetris Classic</span>
+                    <span class="game-time">1d ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Beacons → "still working on this" -->
+    <div class="app-modal" id="beaconsModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">📡 Beacons</div>
+            <button class="app-modal-close" onclick="closeAppModal('beaconsModal')">✕ Close</button>
+        </div>
+        <div class="placeholder-panel">
+            <div class="big-icon">📡</div>
+            <h2>Still Working on This</h2>
+            <p>Beacons and friend activity alerts are currently in development.<br />Check back soon for real-time social updates!</p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  1.  MY GAMES  (14 clickable buttons)                        -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="gamesLibraryModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">🎮 My Games · 14 Titles</div>
+            <button class="app-modal-close" onclick="closeAppModal('gamesLibraryModal')">✕ Close</button>
+        </div>
+        <div class="games-grid-container" id="gamesGrid"></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  2.  ARCADE LIBRARY (4 classic arcade buttons)               -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="arcadeLibraryModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">🕹️ Classic Arcade · 4 Games</div>
+            <button class="app-modal-close" onclick="closeAppModal('arcadeLibraryModal')">✕ Close</button>
+        </div>
+        <div class="arcade-grid" id="arcadeGrid"></div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  3.  ACHIEVEMENTS → "still working on this"                   -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="achievementsModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">🏆 Achievements</div>
+            <button class="app-modal-close" onclick="closeAppModal('achievementsModal')">✕ Close</button>
+        </div>
+        <div class="placeholder-panel">
+            <div class="big-icon">⚙️</div>
+            <h2>Still Working on This</h2>
+            <p>Achievements, Gamerscore, and leaderboards are being built.<br />Check back soon for full trophy support!</p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  4.  STORE FRONT → "still working on this"                    -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="storeFrontModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">🛒 Store Front</div>
+            <button class="app-modal-close" onclick="closeAppModal('storeFrontModal')">✕ Close</button>
+        </div>
+        <div class="placeholder-panel">
+            <div class="big-icon">🏪</div>
+            <h2>Still Working on This</h2>
+            <p>The game store is under development. Soon you'll be able to browse, purchase, and download new titles directly from your dashboard.</p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  5.  DEMOS & TRIAL → "still working on this"                  -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="demosTrialModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">⭐ Free Demos & Trials</div>
+            <button class="app-modal-close" onclick="closeAppModal('demosTrialModal')">✕ Close</button>
+        </div>
+        <div class="placeholder-panel">
+            <div class="big-icon">🎯</div>
+            <h2>Still Working on This</h2>
+            <p>Demo and trial versions of popular games are coming soon. Stay tuned for free playable previews!</p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  6.  VIDEO PLAYER                                             -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="videoPlayerModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">INBOX Video Player</div>
+            <button class="app-modal-close" onclick="closeVideoModal()">✕ Close</button>
+        </div>
+        <div class="media-player-container">
+            <div class="video-player-card">
+                <div style="display:flex; width:100%; justify-content:space-between; align-items:center;">
+                    <h3 id="currentVideoTitle" style="font-size:16px;">No Video Selected</h3>
+                    <button class="browser-go-btn" onclick="document.getElementById('playerVideoFileInput').click()">📁 Open Local Video</button>
+                </div>
+                <div style="flex:1; width:100%; display:flex; justify-content:center; align-items:center; background:#000; border-radius:8px; overflow:hidden;">
+                    <video id="modalVideoControls" controls style="width:100%; height:100%; max-height:70vh; object-fit:contain; display:none;"></video>
+                    <div id="videoPlaceholder" style="opacity:0.5; text-align:center;">
+                        <p style="font-size:18px; font-weight:bold; margin-bottom:6px;">Local Video Player</p>
+                        <p style="font-size:13px;">Click "Open Local Video" above to stream MP4, WebM, or MKV files.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  7.  BROWSER                                                  -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="browserModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title"><span id="browserIcon"></span> INBOX Live Browser</div>
+            <div class="browser-nav">
+                <input type="text" class="browser-input" id="browserUrl" value="https://wikipedia.org" placeholder="Type URL…" />
+                <button class="browser-go-btn" id="browserGoBtn">Go</button>
+            </div>
+            <button class="app-modal-close" onclick="closeAppModal('browserModal')">✕ Close</button>
+        </div>
+        <iframe class="browser-frame" id="browserFrame" src="https://wikipedia.org"></iframe>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  8.  FILE MANAGER                                             -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="fileManagerModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title"><span id="fileManagerIcon"></span> Real System File Manager</div>
+            <button class="browser-go-btn" onclick="document.getElementById('systemFileManagerInput').click()">+ Load Files</button>
+            <button class="app-modal-close" onclick="closeAppModal('fileManagerModal')">✕ Close</button>
+        </div>
+        <div class="fm-body">
+            <div class="fm-sidebar">
+                <h4 style="font-size:14px; opacity:0.8;">Loaded Files (<span id="fileCountText">0</span>)</h4>
+                <div id="fileListContainer" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1;">
+                    <div style="font-size:12px; opacity:0.5; text-align:center; margin-top:20px;">No files loaded.<br />Click "+ Load Files" to open PDFs, Images, Audio, or Documents.</div>
+                </div>
+            </div>
+            <div class="fm-content">
+                <div style="font-size:14px; font-weight:bold;" id="activeFileName">File Viewer</div>
+                <div class="fm-preview-pane" id="filePreviewPane">
+                    <div style="opacity:0.5; text-align:center;">Select a file from the list to preview.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  9.  MUSIC MODALS                                             -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="monochromeModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">Monochrome Player</div>
+            <button class="app-modal-close" onclick="closeAppModal('monochromeModal')">✕ Close</button>
+        </div>
+        <iframe class="browser-frame" id="monochromeFrame" src="https://monochrome.tf/"></iframe>
+    </div>
+
+    <div class="app-modal" id="audioPlayerModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">Local MP3 Audio Player</div>
+            <button class="app-modal-close" onclick="closeAppModal('audioPlayerModal')">✕ Close</button>
+        </div>
+        <div class="media-player-container">
+            <div class="audio-player-card">
+                <h3 id="currentTrackTitle" style="margin-bottom:15px;">No Song Selected</h3>
+                <button class="browser-go-btn" style="margin-bottom:20px;" onclick="document.getElementById('audioFileInput').click()">📁 Load MP3 Track</button>
+                <div>
+                    <audio id="visibleAudioControls" controls style="width:100%;"></audio>
+                </div>
+                <p style="font-size:12px; opacity:0.6; margin-top:15px;">Audio continues playing even when you close this window.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-modal" id="radioGardenModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">Radio Garden</div>
+            <button class="app-modal-close" onclick="closeAppModal('radioGardenModal')">✕ Close</button>
+        </div>
+        <iframe class="browser-frame" id="radioGardenFrame" src="https://radio.garden/"></iframe>
+    </div>
+
+    <div class="app-modal" id="spotifyModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">Spotify Playlist</div>
+            <button class="app-modal-close" onclick="closeAppModal('spotifyModal')">✕ Close</button>
+        </div>
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:20px;">
+            <iframe data-testid="embed-iframe" style="border-radius:12px; width:100%; height:352px;" src="https://open.spotify.com/embed/playlist/0fj3SaAGqCiUCqOcoIiGu4?utm_source=generator&theme=0&si=0778d41141b34328" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+    </div>
+
+    <div class="app-modal" id="podcastsModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">Podcasts Online</div>
+            <button class="app-modal-close" onclick="closeAppModal('podcastsModal')">✕ Close</button>
+        </div>
+        <iframe class="browser-frame" id="podcastsFrame" src="https://www.podcasts-online.org/"></iframe>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  10. LIVE TV                                                  -->
+    <!-- ============================================================ -->
+    <div class="app-modal" id="liveTvModal">
+        <div class="app-modal-header">
+            <div class="app-modal-title">Live TV Stream</div>
+            <button class="app-modal-close" onclick="closeAppModal('liveTvModal')">✕ Close</button>
+        </div>
+        <iframe class="browser-frame" id="liveTvFrame" src="https://famelack.com/"></iframe>
+    </div>
+
+    <!-- ===== POPUP ===== -->
+    <div class="popup-dialog" id="infoPopup">
+        <h3 id="popupTitle">Notification</h3>
+        <p id="popupText">Message</p>
+        <button onclick="closeInfoPopup()">OK</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  SCRIPT                                                      -->
+    <!-- ============================================================ -->
+    <script>
+        // ===== SVG ICONS =====
+        const SVG = {
+            disc: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`,
+            pin: `<svg class="icon" viewBox="0 0 24 24"><path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></svg>`,
+            clock: `<svg class="icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
+            bolt: `<svg class="icon" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`,
+            bell: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`,
+            users: `<svg class="icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`,
+            mail: `<svg class="icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`,
+            party: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>`,
+            user: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`,
+            trophy: `<svg class="icon" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>`,
+            gamepad: `<svg class="icon" viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 1c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>`,
+            joystick: `<svg class="icon" viewBox="0 0 24 24"><path d="M15 7.5V2H9v5.5C7.21 8.5 6 10.38 6 12.5c0 2.22 1.44 4.1 3.44 4.79C7.4 18.2 4 19.33 4 22h16c0-2.67-3.4-3.8-5.44-4.71C16.56 16.6 18 14.72 18 12.5c0-2.12-1.21-4-3-5px"/></svg>`,
+            cart: `<svg class="icon" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z"/></svg>`,
+            star: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`,
+            tv: `<svg class="icon" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>`,
+            film: `<svg class="icon" viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>`,
+            play: `<svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`,
+            popcorn: `<svg class="icon" viewBox="0 0 24 24"><path d="M7 6c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm10 0c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm-5-2c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zM5 21h14l1-12H4l1 12z"/></svg>`,
+            radio: `<svg class="icon" viewBox="0 0 24 24"><path d="M3.24 6.15C2.51 6.43 2 7.17 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H8.3l7.43-3-1.42-3.41L3.24 6.15zM7 20c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-8h-8v-2h8v2z"/></svg>`,
+            music: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>`,
+            headphones: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9v7c0 1.1.9 2 2 2h3v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-3v8h3c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9z"/></svg>`,
+            mic: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>`,
+            globe: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+            folder: `<svg class="icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`,
+            cloud: `<svg class="icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>`,
+            download: `<svg class="icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>`,
+            wrench: `<svg class="icon" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.6C.4 7 1 10 3 12c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.4-.4.4-1.1 0-1.3z"/></svg>`,
+            palette: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61.43.53 1.12.86 1.83.86h2.2c.83 0 1.5-.67 1.5-1.5 0-.38-.15-.73-.39-1-.24-.27-.39-.62-.39-1 0-.83.67-1.5 1.5-1.5H13c3.87 0 7-3.13 7-7 0-4.97-4.03-9-9-9zm-6.5 9c-.83 0-1.5-.67-1.5-1.5S4.67 9 5.5 9s1.5.67 1.5 1.5S6.33 12 5.5 12zm3-4C7.67 8 7 7.33 7 6.5S7.67 5 8.5 5s1.5.67 1.5 1.5S9.33 8 8.5 8zm7 0c-.83 0-1.5-.67-1.5-1.5S14.67 5 15.5 5s1.5.67 1.5 1.5S16.33 8 15.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>`,
+            font: `<svg class="icon" viewBox="0 0 24 24"><path d="M9.93 13.5h4.14L12 7.98zM20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-4.05 16.5l-1.14-3H9.17l-1.12 3H5.96l5.11-13h1.86l5.11 13h-2.09z"/></svg>`,
+            image: `<svg class="icon" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`,
+            volume: `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`,
+            fileText: `<svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`
+        };
+
+        document.getElementById('userProfileIcon').innerHTML = SVG.user;
+        document.getElementById('browserIcon').innerHTML = SVG.globe;
+        document.getElementById('fileManagerIcon').innerHTML = SVG.folder;
+
+        // ================================================================
+        //  1.  MY GAMES  →  14 clickable buttons
+        // ================================================================
+        let gamesData = JSON.parse(localStorage.getItem('inbox_games_data')) || [
+            { name: "Doom Classic", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Pac-Man Retro", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Retro Snake", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games://playsnake.org/" },
+            { name: "Tetris Classic", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Space Invaders", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Sonic Retro", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "2048 Game", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Flappy Bird", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Minesweeper", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Retro Football", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Pong Arcade", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Asteroids 1979", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Street Fighter II", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" },
+            { name: "Super Mario Retro", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games" }
+        ];
+
+        function saveGamesData() {
+            localStorage.setItem('inbox_games_data', JSON.stringify(gamesData));
+            renderGamesLibrary();
+        }
+
+        function renderGamesLibrary() {
+            const container = document.getElementById('gamesGrid');
+            container.innerHTML = '';
+            gamesData.forEach((g, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'game-btn';
+                btn.addEventListener('click', () => {
+                    window.open(g.url, '_blank');
+                });
+                btn.innerHTML = `
+                    <div class="game-icon">🎮</div>
+                    <div class="game-title">${g.name}</div>
+                    <div class="game-sub">click to launch</div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+        renderGamesLibrary();
+
+        // ================================================================
+        //  2.  ARCADE LIBRARY  →  4 classic arcade buttons
+        // ================================================================
+        function renderArcadeLibrary() {
+            const container = document.getElementById('arcadeGrid');
+            const arcadeGames = [
+                { name: "Doom (Classic PC)", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games", icon: "🔥" },
+                { name: "Pac-Man Arcade", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games", icon: "🟡" },
+                { name: "Nokia Snake", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games", icon: "🐍" },
+                { name: "GameBoy Tetris", url: "https://sites.google.com/imas.edu.my/inbox630/inbox-games", icon: "🧩" }
+            ];
+            container.innerHTML = '';
+            arcadeGames.forEach(g => {
+                const btn = document.createElement('div');
+                btn.className = 'arcade-btn';
+                btn.addEventListener('click', () => {
+                    window.open(g.url, '_blank');
+                });
+                btn.innerHTML = `
+                    <div class="game-icon">${g.icon}</div>
+                    <div class="game-title">${g.name}</div>
+                    <div class="game-sub" style="font-size:11px;opacity:0.5;">play now</div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+        renderArcadeLibrary();
+
+        // ================================================================
+        //  3.  SOCIAL CATEGORY  →  updated with embedded modals
+        // ================================================================
+
+        // ===== BUTTON COLOR =====
+        let customBtnColor = localStorage.getItem('inbox_button_color') || 'rgba(12, 18, 28, 0.55)';
+
+        function hexToRgba(hex, opacity) {
+            hex = hex.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+
+        function applyButtonColor(color) {
+            let finalBg = color;
+            let borderColor = 'rgba(255, 255, 255, 0.3)';
+            let glowColor = color;
+            if (color.startsWith('#')) {
+                finalBg = hexToRgba(color, 0.65);
+                borderColor = hexToRgba(color, 0.85);
+            }
+            document.documentElement.style.setProperty('--btn-bg', finalBg);
+            document.documentElement.style.setProperty('--btn-border', borderColor);
+            document.documentElement.style.setProperty('--accent-glow', glowColor);
+            customBtnColor = color;
+            localStorage.setItem('inbox_button_color', color);
+        }
+        applyButtonColor(customBtnColor);
+
+        const buttonColorPicker = document.getElementById('buttonColorPicker');
+        buttonColorPicker.addEventListener('input', (e) => applyButtonColor(e.target.value));
+
+        // ===== FONT =====
+        let currentFont = localStorage.getItem('inbox_custom_font') || 'Outfit';
+
+        function applyGoogleFont(fontName) {
+            if (!fontName) return;
+            const cleanFont = fontName.trim();
+            const fontSlug = cleanFont.replace(/\s+/g, '+');
+            let link = document.getElementById('dynamic-font-link');
+            if (!link) {
+                link = document.createElement('link');
+                link.id = 'dynamic-font-link';
+                document.head.appendChild(link);
+            }
+            link.href =
+                `https://fonts.googleapis.com/css2?family=${fontSlug}:wght@400;700;900&display=swap`;
+            document.documentElement.style.setProperty('--main-font', `'${cleanFont}'`);
+            currentFont = cleanFont;
+            localStorage.setItem('inbox_custom_font', cleanFont);
+        }
+        applyGoogleFont(currentFont);
+
+        function promptCustomFont() {
+            const userFont = prompt("Enter ANY Google Font Name (e.g., Press Start 2P, Orbitron, VT323):", currentFont);
+            if (userFont && userFont.trim() !== "") {
+                applyGoogleFont(userFont.trim());
+                renderCategory('settings');
+            }
+        }
+
+        // ===== AUDIO =====
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playMoveSound() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(380, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        }
+
+        function playSelectSound() {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(450, now);
+            osc.frequency.setValueAtTime(850, now + 0.05);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        }
+
+        function playBootSound() {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const bassOsc = audioCtx.createOscillator();
+            const bassGain = audioCtx.createGain();
+            bassOsc.type = 'sine';
+            bassOsc.frequency.setValueAtTime(60, now);
+            bassOsc.frequency.exponentialRampToValueAtTime(180, now + 1.2);
+            bassGain.gain.setValueAtTime(0.01, now);
+            bassGain.gain.linearRampToValueAtTime(0.2, now + 0.8);
+            bassGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+            bassOsc.connect(bassGain);
+            bassGain.connect(audioCtx.destination);
+            bassOsc.start(now);
+            bassOsc.stop(now + 2.0);
+        }
+
+        window.addEventListener('click', initAudio, { once: true });
+        window.addEventListener('keydown', initAudio, { once: true });
+
+        // ===== WALLPAPER =====
+        const wallpaperImg = document.getElementById('wallpaper-image');
+        const wallpaperVid = document.getElementById('wallpaper-video');
+        const imageFileInput = document.getElementById('imageFileInput');
+        const gifFileInput = document.getElementById('gifFileInput');
+        const videoFileInput = document.getElementById('videoFileInput');
+        let isVideoSoundOn = false;
+
+        function setMediaSource(type, src) {
+            initAudio();
+            if (type === 'none') {
+                wallpaperImg.style.display = 'none';
+                wallpaperVid.style.display = 'none';
+                wallpaperVid.pause();
+            } else if (type === 'image') {
+                wallpaperVid.pause();
+                wallpaperVid.style.display = 'none';
+                wallpaperImg.src = src;
+                wallpaperImg.style.display = 'block';
+            } else if (type === 'video') {
+                wallpaperImg.style.display = 'none';
+                wallpaperVid.src = src;
+                wallpaperVid.style.display = 'block';
+                wallpaperVid.muted = !isVideoSoundOn;
+                wallpaperVid.play().catch(() => {});
+            }
+        }
+
+        function toggleVideoSound() {
+            isVideoSoundOn = !isVideoSoundOn;
+            wallpaperVid.muted = !isVideoSoundOn;
+            renderCategory('settings');
+        }
+
+        imageFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) setMediaSource('image', URL.createObjectURL(file));
+        });
+        gifFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) setMediaSource('image', URL.createObjectURL(file));
+        });
+        videoFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) setMediaSource('video', URL.createObjectURL(file));
+        });
+
+        // ===== IN-APP VIDEO =====
+        const playerVideoFileInput = document.getElementById('playerVideoFileInput');
+        const modalVideoControls = document.getElementById('modalVideoControls');
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const currentVideoTitle = document.getElementById('currentVideoTitle');
+
+        playerVideoFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const videoUrl = URL.createObjectURL(file);
+                modalVideoControls.src = videoUrl;
+                modalVideoControls.style.display = 'block';
+                videoPlaceholder.style.display = 'none';
+                currentVideoTitle.textContent = file.name;
+                modalVideoControls.play();
+            }
+        });
+
+        function closeVideoModal() {
+            modalVideoControls.pause();
+            closeAppModal('videoPlayerModal');
+        }
+
+        // ===== CLOCK & SCREENSAVER =====
+        let idleTimer = null;
+        let isIdle = false;
+        const screensaver = document.getElementById('screensaver');
+        const screensaverClock = document.getElementById('screensaverClock');
+        const screensaverDate = document.getElementById('screensaverDate');
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            screensaverClock.textContent = `${String(hours).padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
+            screensaverDate.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric',
+                year: 'numeric' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function triggerScreensaver() {
+            isIdle = true;
+            screensaver.classList.add('active');
+            document.body.classList.add('screensaver-on');
+        }
+
+        function wakeUp() {
+            if (isIdle) {
+                isIdle = false;
+                screensaver.classList.remove('active');
+                document.body.classList.remove('screensaver-on');
+            }
+            resetIdleTimer();
+        }
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(triggerScreensaver, 10000);
+        }
+        ['mousemove', 'mousedown', 'keydown', 'touchstart'].forEach(evt =>
+            window.addEventListener(evt, wakeUp, { passive: true })
+        );
+        resetIdleTimer();
+
+        // ===== BOOT =====
+        const bootScreen = document.getElementById('boot-screen');
+        setTimeout(() => {
+            try { playBootSound(); } catch (e) {}
+            bootScreen.style.opacity = '0';
+            setTimeout(() => bootScreen.style.visibility = 'hidden', 800);
+        }, 2800);
+
+        // ===== LOGIN =====
+        const startScreen = document.getElementById('start-screen');
+        const loginModal = document.getElementById('login-modal');
+        const nxeSignInBtn = document.getElementById('nxeSignInBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const errorMsg = document.getElementById('errorMsg');
+        const userProfileText = document.getElementById('userProfileText');
+
+        nxeSignInBtn.addEventListener('click', () => {
+            playSelectSound();
+            loginModal.classList.add('visible');
+            currentZone = 'MODAL';
+            zoneIndices['MODAL'] = 0;
+            highlightCurrent();
+        });
+
+        loginBtn.addEventListener('click', attemptLogin);
+
+        function attemptLogin() {
+            if (passwordInput.value === 'homework123') {
+                playSelectSound();
+                errorMsg.style.display = 'none';
+                loginModal.classList.remove('visible');
+                startScreen.style.opacity = '0';
+                setTimeout(() => startScreen.style.visibility = 'hidden', 500);
+                const gamertag = usernameInput.value.trim() || 'Player 1';
+                userProfileText.textContent = gamertag;
+                document.getElementById('profileGamertag').textContent = gamertag;
+                renderCategory('home');
+                currentZone = 'NAV';
+                zoneIndices['NAV'] = 0;
+                highlightCurrent();
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // ===== CATEGORY DATA =====
+        const categoryData = {
+            home: {
+                // Static hero for home: Xbox 360 image + feature highlights
+                staticHero: {
+                    image: "https://joao13traducoes.com/wp-content/uploads/2021/10/xbox-360-image-browser-v290350-803009515.png", // Xbox 360 controller / console
+                    title: "Welcome to INBOX 630",
+                    desc: "Good things: All your games, social hub, media player, and system tools in one place.\nNew: 14 custom games, embedded social apps, and Xbox 360-style profile view."
+                },
+                tiles: [
+                    { icon: SVG.disc, text: "Open Tray", sub: "Discs & drive options" },
+                    { icon: SVG.pin, text: "My Pins", sub: "Quick pinned shortcuts" },
+                    { icon: SVG.clock, text: "Recent Activity", sub: "View last opened apps" }
+                ],
+                subTiles: [
+                    { icon: SVG.bolt, text: "Quick Launch" },
+                    { icon: SVG.bell, text: "Notifications" }
+                ]
+            },
+            social: {
+                heroTitle: "SOCIAL & FRIENDS",
+                heroDesc: "Connect with players, join party audio, and track online status.",
+                tiles: [{
+                    icon: SVG.users,
+                    text: "Friends List",
+                    sub: "View your Padlet friends",
+                    action: () => openAppModal('friendsListModal')
+                }, {
+                    icon: SVG.mail,
+                    text: "Messages",
+                    sub: "Check your Proton Mail",
+                    action: () => openAppModal('messagesModal')
+                }, {
+                    icon: SVG.party,
+                    text: "Airtalk",
+                    sub: "Voice chat & party",
+                    action: () => openAppModal('partyChatModal')
+                }],
+                subTiles: [{
+                    icon: SVG.user,
+                    text: "View Profile",
+                    action: () => openAppModal('viewProfileModal')
+                }, {
+                    icon: SVG.trophy,
+                    text: "Beacons",
+                    action: () => openAppModal('beaconsModal')
+                }]
+            },
+            games: {
+                heroTitle: "GAMES HUB & ARCADE",
+                heroDesc: "14 custom games + 4 classic arcade titles. Click any to play.",
+                gameCarousel: true,
+                tiles: [{
+                    icon: SVG.gamepad,
+                    text: "My Games",
+                    sub: "14 clickable titles",
+                    action: () => openAppModal('gamesLibraryModal')
+                }, {
+                    icon: SVG.joystick,
+                    text: "Arcade Library",
+                    sub: "4 classic arcade games",
+                    action: () => openAppModal('arcadeLibraryModal')
+                }, {
+                    icon: SVG.trophy,
+                    text: "Achievements",
+                    sub: "🏗️ in development",
+                    action: () => openAppModal('achievementsModal')
+                }],
+                subTiles: [{
+                    icon: SVG.cart,
+                    text: "Store Front",
+                    action: () => openAppModal('storeFrontModal')
+                }, {
+                    icon: SVG.star,
+                    text: "Demos & Trial",
+                    action: () => openAppModal('demosTrialModal')
+                }]
+            },
+            tvmovies: {
+                heroTitle: "NEON HORIZON",
+                heroDesc: "Trending Movie: Cyberpunk thrillers & high-octane cinematic releases.",
+                carousel: true,
+                tiles: [{
+                    icon: SVG.tv,
+                    text: "Video Player",
+                    sub: "Play local video files",
+                    action: () => openAppModal('videoPlayerModal')
+                }, {
+                    icon: SVG.film,
+                    text: "(Cinemacity)",
+                    sub: "Open cinemacity.cc",
+                    action: () => window.open('https://cinemacity.cc/', '_blank')
+                }, {
+                    icon: SVG.play,
+                    text: "(MyCima)",
+                    sub: "Open mycima.energy",
+                    action: () => window.open('https://mycima.energy/', '_blank')
+                }],
+                subTiles: [{
+                    icon: SVG.popcorn,
+                    text: "Featured",
+                    action: () => showInfoPopup("Featured", "System updated! All games and channels operational.")
+                }, {
+                    icon: SVG.radio,
+                    text: "Live TV",
+                    action: () => openAppModal('liveTvModal')
+                }]
+            },
+            music: {
+                heroTitle: "MUSIC & AUDIO",
+                heroDesc: "High-fidelity stream players, Radio Garden, local MP3, Spotify, & Podcasts.",
+                tiles: [{
+                    icon: SVG.music,
+                    text: "(monochrome)",
+                    sub: "Embedded Monochrome live stream",
+                    action: () => openAppModal('monochromeModal')
+                }, {
+                    icon: SVG.headphones,
+                    text: "Audio Player",
+                    sub: "Play MP3 files in background",
+                    action: () => openAppModal('audioPlayerModal')
+                }, {
+                    icon: SVG.radio,
+                    text: "Radio Stations",
+                    sub: "Explore global stations",
+                    action: () => openAppModal('radioGardenModal')
+                }],
+                subTiles: [{
+                    icon: SVG.music,
+                    text: "Playlists",
+                    action: () => openAppModal('spotifyModal')
+                }, {
+                    icon: SVG.mic,
+                    text: "Podcasts",
+                    action: () => openAppModal('podcastsModal')
+                }]
+            },
+            apps: {
+                heroTitle: "SYSTEM APPS",
+                heroDesc: "Launch web browser, read PDF/files, or check cloud storage.",
+                tiles: [{
+                    icon: SVG.globe,
+                    text: "Web Browser",
+                    sub: "Working live web browser",
+                    action: () => openAppModal('browserModal')
+                }, {
+                    icon: SVG.folder,
+                    text: "File Manager",
+                    sub: "Real storage system",
+                    action: () => openAppModal('fileManagerModal')
+                }, {
+                    icon: SVG.cloud,
+                    text: "Cloud Storage",
+                    sub: "Connected: Storing saves for 14 games",
+                    action: () => showInfoPopup("Cloud Storage",
+                        "Cloud Backup Status: Active!\n\nCurrently storing save data & profiles for all 14 games.")
+                }],
+                subTiles: [{
+                    icon: SVG.download,
+                    text: "App Market",
+                    action: () => showInfoPopup("App Market", "App Market is active!")
+                }, {
+                    icon: SVG.wrench,
+                    text: "Tools",
+                    action: () => showInfoPopup("Tools", "System diagnostics running normal.")
+                }]
+            },
+            settings: {
+                heroTitle: "SYSTEM SETTINGS",
+                heroDesc: `Current Font: "${currentFont}". Adjust button colors, fonts, and wallpapers.`,
+                tiles: [{
+                    icon: SVG.palette,
+                    text: "Pick Any Button Color",
+                    sub: "Open dynamic color wheel",
+                    action: () => buttonColorPicker.click()
+                }, {
+                    icon: SVG.palette,
+                    text: "Reset Button Color",
+                    sub: "Reset to default glass styling",
+                    action: () => applyButtonColor('rgba(12, 18, 28, 0.55)')
+                }],
+                subTiles: [{
+                    icon: SVG.font,
+                    text: "Change Google Font",
+                    action: promptCustomFont
+                }, {
+                    icon: SVG.image,
+                    text: "Upload Wallpaper",
+                    action: () => imageFileInput.click()
+                }, {
+                    icon: SVG.film,
+                    text: "Upload Video BG",
+                    action: () => videoFileInput.click()
+                }, {
+                    icon: SVG.volume,
+                    text: () => `Video Audio: ${isVideoSoundOn ? "ON" : "OFF"}`,
+                    action: toggleVideoSound
+                }]
+            }
+        };
+
+        // ===== RENDER CATEGORY =====
+        const navItems = Array.from(document.querySelectorAll('.nav-item'));
+        const leftColumn = document.getElementById('leftColumn');
+        const heroDetails = document.getElementById('heroDetails');
+        const secondaryRow = document.getElementById('secondaryRow');
+
+        function renderCategory(catKey) {
+            const data = categoryData[catKey] || categoryData.home;
+            leftColumn.innerHTML = '';
+            data.tiles.forEach((t, i) => {
+                const tile = document.createElement('div');
+                tile.className = `glass-tile focusable ${i === 0 ? 'selected' : ''}`;
+                tile.innerHTML = `
+                    <div class="tile-icon">${t.icon}</div>
+                    <div class="tile-info">
+                        <div class="tile-text">${typeof t.text === 'function' ? t.text() : t.text}</div>
+                        ${t.sub ? `<div class="tile-subtext">${t.sub}</div>` : ''}
+                    </div>
+                `;
+                tile.addEventListener('click', () => {
+                    playSelectSound();
+                    currentZone = 'LEFT_COL';
+                    zoneIndices['LEFT_COL'] = i;
+                    highlightCurrent();
+                    if (t.action) t.action();
+                });
+                tile.addEventListener('mouseenter', () => {
+                    currentZone = 'LEFT_COL';
+                    zoneIndices['LEFT_COL'] = i;
+                    highlightCurrent();
+                });
+                leftColumn.appendChild(tile);
+            });
+
+            // Hero: check for staticHero first
+            if (data.staticHero) {
+                stopCarousel();
+                const bg0 = document.getElementById('heroBg0');
+                bg0.style.backgroundImage = `url('${data.staticHero.image}')`;
+                bg0.classList.add('active');
+                document.getElementById('heroBg1').classList.remove('active');
+                heroDetails.querySelector('h1').textContent = data.staticHero.title;
+                heroDetails.querySelector('p').textContent = data.staticHero.desc;
+                document.getElementById('carouselIndicators').style.display = 'none';
+            } else if (data.carousel) {
+                startCarousel(moviePosters);
+            } else if (data.gameCarousel) {
+                startCarousel(gamePosters);
+            } else {
+                stopCarousel();
+                heroDetails.querySelector('h1').textContent = data.heroTitle;
+                heroDetails.querySelector('p').textContent = data.heroDesc;
+            }
+
+            // Sub-row
+            secondaryRow.innerHTML = '';
+            data.subTiles.forEach((st, i) => {
+                const sub = document.createElement('div');
+                sub.className = 'sub-tile focusable';
+                sub.innerHTML =
+                    `<span class="sub-icon">${st.icon}</span><span>${typeof st.text === 'function' ? st.text() : st.text}</span>`;
+                sub.addEventListener('click', () => {
+                    playSelectSound();
+                    currentZone = 'SUB_ROW';
+                    zoneIndices['SUB_ROW'] = i;
+                    highlightCurrent();
+                    if (st.action) st.action();
+                });
+                sub.addEventListener('mouseenter', () => {
+                    currentZone = 'SUB_ROW';
+                    zoneIndices['SUB_ROW'] = i;
+                    highlightCurrent();
+                });
+                secondaryRow.appendChild(sub);
+            });
+        }
+
+        // ===== NAV CLICKS =====
+        navItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                playSelectSound();
+                navItems.forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                renderCategory(item.dataset.category);
+                currentZone = 'NAV';
+                zoneIndices['NAV'] = index;
+                highlightCurrent();
+            });
+            item.addEventListener('mouseenter', () => {
+                currentZone = 'NAV';
+                zoneIndices['NAV'] = index;
+                highlightCurrent();
+            });
+        });
+
+        // ===== CAROUSEL =====
+        const moviePosters = [{
+            title: "The Dog Stars",
+            desc: "A gripping post-apocalyptic drama directed by Ridley Scott, starring Jacob Elordi and Josh Brolin.",
+            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQiePcDB86hS7OYkStqLGwdmqW6X6tO1SEohDOw7CAd8w&s=10"
+        }, {
+            title: "Coyote vs. Acme",
+            desc: "A live-action/animation hybrid comedy starring John Cena and Will Forte.",
+            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1OFiq_nEOM5l8thVBd0XKlzRbnZnac-CA4Td3NnEAgg&s=10"
+        }, {
+            title: "A Matter of Life and Death",
+            desc: "A witty Saudi romantic comedy co-written by and starring Sarah Taibah.",
+            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAUMDm_7YB1VuOWZBj5OEfs3SPAcDBo75LOOV2Coi7Uw&s=10"
+        }, {
+            title: "Shish Dou",
+            desc: "A fast-paced Egyptian dark comedy-drama starring Bassem Samra and Bayoumy Fouad.",
+            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThAQqRK_CvMf4zXFhVeKgEtJCe16_xOVERxZ44mE_fkw&s=10"
+        }, {
+            title: "Time Hoppers: The Silk Road",
+            desc: "An animated adventure following four children who travel back in time.",
+            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcH39lmVBAR_TQrFbvrk4CDlTURNouoB9KPzFCbuLYhA&s=10"
+        }];
+
+        const gamePosters = [{
+            title: "Doom & Retro Arcade Hub",
+            desc: "Play classic 90s PC and old phone mini-games right inside your INBOX dashboard.",
+            img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200"
+        }, {
+            title: "Pac-Man & Classic Phone Mini-Games",
+            desc: "Relive retro gaming history with Pac-Man, Snake, Tetris, and 14 fully editable games links.",
+            img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200"
+        }];
+
+        let carouselTimer = null;
+        let currentSlideIdx = 0;
+        let activeBgSlot = 0;
+
+        function startCarousel(itemsList) {
+            stopCarousel();
+            const indicatorsContainer = document.getElementById('carouselIndicators');
+            indicatorsContainer.style.display = 'flex';
+            indicatorsContainer.innerHTML = '';
+            itemsList.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = `carousel-dot ${i === 0 ? 'active' : ''}`;
+                dot.addEventListener('click', () => {
+                    currentSlideIdx = i;
+                    updateCarouselSlide(itemsList, true);
+                });
+                indicatorsContainer.appendChild(dot);
+            });
+            updateCarouselSlide(itemsList, false);
+            carouselTimer = setInterval(() => {
+                currentSlideIdx = (currentSlideIdx + 1) % itemsList.length;
+                updateCarouselSlide(itemsList, true);
+            }, 4000);
+        }
+
+        function updateCarouselSlide(itemsList, fade) {
+            const item = itemsList[currentSlideIdx];
+            const bg0 = document.getElementById('heroBg0');
+            const bg1 = document.getElementById('heroBg1');
+            const currentSlot = activeBgSlot === 0 ? bg0 : bg1;
+            const nextSlot = activeBgSlot === 0 ? bg1 : bg0;
+            if (fade) {
+                nextSlot.style.backgroundImage = `url('${item.img}')`;
+                nextSlot.classList.add('active');
+                currentSlot.classList.remove('active');
+                activeBgSlot = activeBgSlot === 0 ? 1 : 0;
+            } else {
+                currentSlot.style.backgroundImage = `url('${item.img}')`;
+                currentSlot.classList.add('active');
+                nextSlot.classList.remove('active');
+            }
+            heroDetails.querySelector('h1').textContent = item.title;
+            heroDetails.querySelector('p').textContent = item.desc;
+            const dots = document.querySelectorAll('.carousel-dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentSlideIdx) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        function stopCarousel() {
+            if (carouselTimer) clearInterval(carouselTimer);
+            carouselTimer = null;
+            document.getElementById('heroBg0').classList.remove('active');
+            document.getElementById('heroBg1').classList.remove('active');
+            document.getElementById('carouselIndicators').style.display = 'none';
+        }
+
+        // ===== MODALS =====
+        function openAppModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeAppModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        document.getElementById('browserGoBtn').addEventListener('click', () => {
+            let url = document.getElementById('browserUrl').value.trim();
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            document.getElementById('browserFrame').src = url;
+        });
+
+        function showInfoPopup(title, text) {
+            document.getElementById('popupTitle').textContent = title;
+            document.getElementById('popupText').textContent = text;
+            document.getElementById('infoPopup').classList.add('active');
+        }
+
+        function closeInfoPopup() {
+            document.getElementById('infoPopup').classList.remove('active');
+        }
+
+        // ===== AUDIO PLAYER =====
+        const globalBgAudio = document.getElementById('globalBgAudio');
+        const visibleAudioControls = document.getElementById('visibleAudioControls');
+        const audioFileInput = document.getElementById('audioFileInput');
+        const currentTrackTitle = document.getElementById('currentTrackTitle');
+
+        audioFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const audioUrl = URL.createObjectURL(file);
+                globalBgAudio.src = audioUrl;
+                visibleAudioControls.src = audioUrl;
+                currentTrackTitle.textContent = file.name;
+                globalBgAudio.play();
+                visibleAudioControls.play();
+            }
+        });
+        visibleAudioControls.addEventListener('play', () => globalBgAudio.play());
+        visibleAudioControls.addEventListener('pause', () => globalBgAudio.pause());
+
+        // ===== FILE MANAGER =====
+        const loadedFiles = [];
+        const systemFileManagerInput = document.getElementById('systemFileManagerInput');
+        const fileListContainer = document.getElementById('fileListContainer');
+        const fileCountText = document.getElementById('fileCountText');
+        const filePreviewPane = document.getElementById('filePreviewPane');
+        const activeFileName = document.getElementById('activeFileName');
+
+        systemFileManagerInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                loadedFiles.push({ name: file.name, type: file.type, url: URL.createObjectURL(file) });
+            });
+            renderFileList();
+        });
+
+        function renderFileList() {
+            fileCountText.textContent = loadedFiles.length;
+            fileListContainer.innerHTML = '';
+            if (loadedFiles.length === 0) {
+                fileListContainer.innerHTML =
+                    `<div style="font-size:12px; opacity:0.5; text-align:center; margin-top:20px;">No files loaded.<br/>Click "+ Load Files" to open PDFs, Images, Audio, or Documents.</div>`;
+                return;
+            }
+            loadedFiles.forEach((file, idx) => {
+                const item = document.createElement('div');
+                item.className = 'fm-file-item';
+                let icon = SVG.fileText;
+                if (file.type.includes('image')) icon = SVG.image;
+                else if (file.type.includes('video')) icon = SVG.film;
+                else if (file.type.includes('audio')) icon = SVG.music;
+                item.innerHTML =
+                    `<div style="font-size:13px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:flex; align-items:center; gap:8px;">${icon} <span>${file.name}</span></div>`;
+                item.addEventListener('click', () => previewFile(idx));
+                fileListContainer.appendChild(item);
+            });
+        }
+
+        function previewFile(index) {
+            const file = loadedFiles[index];
+            activeFileName.textContent = file.name;
+            filePreviewPane.innerHTML = '';
+            if (file.type.includes('image')) {
+                const img = document.createElement('img');
+                img.src = file.url;
+                filePreviewPane.appendChild(img);
+            } else if (file.type.includes('video')) {
+                const video = document.createElement('video');
+                video.src = file.url;
+                video.controls = true;
+                video.autoplay = true;
+                filePreviewPane.appendChild(video);
+            } else if (file.type.includes('pdf') || file.type.includes('text')) {
+                const iframe = document.createElement('iframe');
+                iframe.src = file.url;
+                filePreviewPane.appendChild(iframe);
+            } else {
+                filePreviewPane.innerHTML =
+                    `<div style="text-align:center;"><p style="margin-bottom:10px;">Preview not supported for file type: ${file.type || 'Unknown'}</p><a href="${file.url}" download="${file.name}" style="color:#00d2ff;">Download File</a></div>`;
+            }
+        }
+
+        // ===== FOCUS / CONTROLLER =====
+        let currentZone = 'START';
+        let zoneIndices = { START: 1, MODAL: 0, NAV: 0, LEFT_COL: 0, SUB_ROW: 0 };
+
+        function getActiveZoneElements() {
+            if (currentZone === 'START') return Array.from(startScreen.querySelectorAll('.nxe-card'));
+            if (currentZone === 'MODAL') return [usernameInput, passwordInput, loginBtn];
+            if (currentZone === 'NAV') return navItems;
+            if (currentZone === 'LEFT_COL') return Array.from(leftColumn.querySelectorAll('.focusable'));
+            if (currentZone === 'SUB_ROW') return Array.from(secondaryRow.querySelectorAll('.focusable'));
+            return [];
+        }
+
+        function highlightCurrent() {
+            document.querySelectorAll('.focusable').forEach(el => el.classList.remove('focused'));
+            const elements = getActiveZoneElements();
+            const idx = zoneIndices[currentZone];
+            if (elements && elements[idx]) {
+                elements[idx].classList.add('focused');
+                elements[idx].focus();
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const elements = getActiveZoneElements();
+            let idx = zoneIndices[currentZone];
+            switch (e.key) {
+                case 'ArrowRight':
+                    if (currentZone === 'NAV' || currentZone === 'START' || currentZone === 'SUB_ROW') {
+                        idx = (idx + 1) % elements.length;
+                        zoneIndices[currentZone] = idx;
+                        playMoveSound();
+                        highlightCurrent();
+                        if (currentZone === 'NAV') elements[idx].click();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (currentZone === 'NAV' || currentZone === 'START' || currentZone === 'SUB_ROW') {
+                        idx = (idx - 1 + elements.length) % elements.length;
+                        zoneIndices[currentZone] = idx;
+                        playMoveSound();
+                        highlightCurrent();
+                        if (currentZone === 'NAV') elements[idx].click();
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (currentZone === 'NAV') {
+                        currentZone = 'LEFT_COL';
+                        zoneIndices['LEFT_COL'] = 0;
+                        playMoveSound();
+                        highlightCurrent();
+                    } else if (currentZone === 'LEFT_COL') {
+                        if (idx < elements.length - 1) {
+                            zoneIndices['LEFT_COL']++;
+                        } else {
+                            currentZone = 'SUB_ROW';
+                            zoneIndices['SUB_ROW'] = 0;
+                        }
+                        playMoveSound();
+                        highlightCurrent();
+                    } else if (currentZone === 'MODAL') {
+                        zoneIndices['MODAL'] = Math.min(idx + 1, elements.length - 1);
+                        playMoveSound();
+                        highlightCurrent();
+                    }
+                    break;
+                case 'ArrowUp':
+                    if (currentZone === 'SUB_ROW') {
+                        currentZone = 'LEFT_COL';
+                        zoneIndices['LEFT_COL'] = Array.from(leftColumn.querySelectorAll('.focusable')).length - 1;
+                        playMoveSound();
+                        highlightCurrent();
+                    } else if (currentZone === 'LEFT_COL') {
+                        if (idx > 0) {
+                            zoneIndices['LEFT_COL']--;
+                        } else {
+                            currentZone = 'NAV';
+                        }
+                        playMoveSound();
+                        highlightCurrent();
+                    } else if (currentZone === 'MODAL') {
+                        zoneIndices['MODAL'] = Math.max(idx - 1, 0);
+                        playMoveSound();
+                        highlightCurrent();
+                    }
+                    break;
+                case 'Enter':
+                case 'a':
+                case 'A':
+                    if (elements[idx]) {
+                        elements[idx].click();
+                    }
+                    break;
+            }
+        });
+
+        renderCategory('home');
+        highlightCurrent();
+    </script>
+</body>
+</html>
